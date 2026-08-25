@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>เปรียบเทียบต้นทุนสายรัด</title>
+<meta name="theme-color" content="#1E2124">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ต้นทุนสายรัด">
+<meta name="description" content="เปรียบเทียบต้นทุนสายรัดแบบเมตรและแบบกิโล">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E2124;
+    --steel:#3D5A73;
+    --steel-light:#5C7C99;
+    --yellow:#F2C94C;
+    --cream:#F5F3EC;
+    --paper:#FFFFFF;
+    --line:#DCD8CC;
+    --muted:#79766C;
+    --green:#2E7D5B;
+    --green-bg:#E5F2EA;
+    --red:#C24B3F;
+    --red-bg:#FBEAE6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:32px 16px 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  .masthead{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .masthead h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:30px;
+    letter-spacing:0.5px;
+    margin:0;
+    text-transform:uppercase;
+  }
+  .masthead .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0.5px;
+  }
+  .sub{
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 32px;
+    line-height:1.6;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:680px){ .grid{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--paper);
+    border:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    background:var(--ink);
+    color:var(--cream);
+  }
+  .panel-head .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--yellow);
+    letter-spacing:1px;
+  }
+  .panel-head h2{
+    font-family:'Oswald',sans-serif;
+    font-size:16px;
+    font-weight:500;
+    margin:2px 0 0;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .band{
+    height:6px;
+    background:repeating-linear-gradient(90deg,var(--yellow) 0 18px, var(--ink) 18px 20px);
+  }
+  .band.blue{
+    background:repeating-linear-gradient(90deg,var(--steel-light) 0 18px, var(--ink) 18px 20px);
+  }
+
+  .fields{padding:18px 18px 8px;}
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:5px;
+    font-weight:500;
+  }
+  .field .row{display:flex;align-items:center;gap:8px;}
+  .field input[type=number]{
+    flex:1;
+    width:100%;
+    height:38px;
+    border:1px solid var(--line);
+    background:var(--cream);
+    padding:0 10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14.5px;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  .field input[type=number]:focus{
+    outline:none;
+    border-color:var(--steel);
+    background:var(--paper);
+  }
+  .field .unit{
+    font-size:12px;
+    color:var(--muted);
+    white-space:nowrap;
+    min-width:56px;
+  }
+
+  .mode-toggle{
+    display:flex;
+    gap:0;
+    margin-bottom:14px;
+    border:1px solid var(--line);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .mode-toggle button{
+    flex:1;
+    border:none;
+    background:var(--cream);
+    padding:8px 6px;
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:500;
+    color:var(--muted);
+    cursor:pointer;
+    border-right:1px solid var(--line);
+  }
+  .mode-toggle button:last-child{border-right:none;}
+  .mode-toggle button.active{
+    background:var(--ink);
+    color:var(--yellow);
+  }
+
+  .derived{
+    margin:4px 18px 16px;
+    padding:10px 12px;
+    background:var(--cream);
+    border:1px dashed var(--line);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.8;
+  }
+  .derived .warn{color:var(--red);}
+
+  .result{
+    padding:16px 18px 20px;
+    border-top:1px solid var(--line);
+  }
+  .result .label{
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .result .price{
+    font-family:'Oswald',sans-serif;
+    font-size:32px;
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+  .result .price span{
+    font-size:15px;
+    font-weight:400;
+    color:var(--muted);
+    margin-left:4px;
+  }
+
+  /* comparison gauge */
+  .gauge-wrap{
+    margin-top:24px;
+    background:var(--ink);
+    color:var(--cream);
+    padding:22px 24px;
+    position:relative;
+  }
+  .gauge-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .gauge-top .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--yellow);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+  }
+  .winner-line{
+    font-family:'Oswald',sans-serif;
+    font-size:22px;
+    font-weight:500;
+    margin:0 0 16px;
+  }
+  .winner-line .amt{color:var(--yellow);}
+  .track{
+    position:relative;
+    height:34px;
+    background:#33383D;
+    border-radius:17px;
+    overflow:hidden;
+  }
+  .fill{
+    position:absolute;
+    top:0;left:0;bottom:0;
+    background:var(--yellow);
+    border-radius:17px;
+    transition:width 0.35s ease;
+  }
+  .track-labels{
+    display:flex;
+    justify-content:space-between;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:#B7B4A9;
+    margin-top:8px;
+  }
+
+  .order-wrap{
+    margin-top:20px;
+    background:var(--paper);
+    border:1px solid var(--line);
+  }
+  .order-head{
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .order-head .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--steel);
+    letter-spacing:1px;
+  }
+  .order-head h2{
+    font-family:'Oswald',sans-serif;
+    font-size:16px;
+    font-weight:500;
+    margin:2px 0 0;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .order-body{padding:18px;}
+  .basis-toggle{
+    display:flex;
+    gap:0;
+    margin-bottom:16px;
+    border:1px solid var(--line);
+    border-radius:2px;
+    overflow:hidden;
+    max-width:420px;
+  }
+  .basis-toggle button{
+    flex:1;
+    border:none;
+    background:var(--cream);
+    padding:9px 8px;
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--muted);
+    cursor:pointer;
+    border-right:1px solid var(--line);
+  }
+  .basis-toggle button:last-child{border-right:none;}
+  .basis-toggle button.active{
+    background:var(--ink);
+    color:var(--yellow);
+  }
+  .order-qty-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .order-qty-row label{
+    font-size:12.5px;
+    color:var(--muted);
+    font-weight:500;
+    white-space:nowrap;
+  }
+  .order-qty-row input{
+    width:120px;
+    height:38px;
+    border:1px solid var(--line);
+    background:var(--cream);
+    padding:0 10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14.5px;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  .order-qty-row input:focus{outline:none;border-color:var(--steel);background:var(--paper);}
+  .order-qty-row .unit{font-size:12px;color:var(--muted);}
+
+  .order-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .order-table th{
+    text-align:left;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    font-weight:500;
+    padding:6px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  .order-table td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--line);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .order-table td.label-cell{
+    font-family:'Inter',sans-serif;
+    color:var(--muted);
+  }
+  .order-table tr:last-child td{border-bottom:none;}
+  .order-table td.hi{font-weight:600;}
+
+  .save-banner{
+    margin-top:16px;
+    padding:16px 18px;
+    background:var(--green-bg);
+    border:1px solid var(--green);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .save-banner.neg{background:var(--red-bg);border-color:var(--red);}
+  .save-banner .sb-item{text-align:left;}
+  .save-banner .sb-label{font-size:11.5px;color:var(--muted);margin-bottom:2px;}
+  .save-banner .sb-value{
+    font-family:'Oswald',sans-serif;
+    font-size:22px;
+    font-weight:600;
+    color:var(--green);
+  }
+  .save-banner.neg .sb-value{color:var(--red);}
+
+  footer{
+    margin-top:28px;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.8;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  footer b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>ต้นทุนสายรัด/เมตร</h1>
+    <div class="tag">STRAP&nbsp;COST&nbsp;COMPARATOR</div>
+  </div>
+  <p class="sub">เปรียบเทียบราคาต่อเมตรระหว่างสายรัดที่ขายเป็น "เมตร" กับสายรัดที่ขายเป็น "กิโลกรัม" กรอกตัวเลขด้านล่าง ระบบคำนวณให้ทันที</p>
+
+  <div class="grid">
+
+    <!-- METER BASED -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="num">A · แบบเมตร</div>
+          <h2>Length-based</h2>
+        </div>
+      </div>
+      <div class="band"></div>
+      <div class="fields">
+        <div class="field">
+          <label>ราคาต่อม้วน</label>
+          <div class="row">
+            <input type="number" id="m_price" value="1200" step="1" min="0">
+            <span class="unit">บาท</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>ความยาวต่อม้วน</label>
+          <div class="row">
+            <input type="number" id="m_length" value="200" step="1" min="0.0001">
+            <span class="unit">เมตร</span>
+          </div>
+        </div>
+      </div>
+      <div class="derived" id="m_derived"></div>
+      <div class="result">
+        <div class="label">ราคาต่อเมตร</div>
+        <div class="price" id="m_result">–</div>
+      </div>
+    </div>
+
+    <!-- KG BASED -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="num">B · แบบกิโล</div>
+          <h2>Weight-based</h2>
+        </div>
+      </div>
+      <div class="band blue"></div>
+      <div class="fields">
+        <div class="mode-toggle">
+          <button id="k_mode_perkg" class="active">ราคา/กก.</button>
+          <button id="k_mode_total">ราคา/ม้วน</button>
+        </div>
+        <div class="field" id="k_price_wrap">
+          <label id="k_price_label">ราคาต่อกิโลกรัม</label>
+          <div class="row">
+            <input type="number" id="k_price" value="65" step="0.1" min="0">
+            <span class="unit">บาท</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>น้ำหนักม้วน (รวมแกน)</label>
+          <div class="row">
+            <input type="number" id="k_rollweight" value="18" step="0.01" min="0">
+            <span class="unit">กก.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>น้ำหนักแกน</label>
+          <div class="row">
+            <input type="number" id="k_coreweight" value="1" step="0.01" min="0">
+            <span class="unit">กก.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>น้ำหนักต่อเมตร (สเปกสายรัด)</label>
+          <div class="row">
+            <input type="number" id="k_gpm" value="8.5" step="0.01" min="0.0001">
+            <span class="unit">กรัม/ม.</span>
+          </div>
+        </div>
+      </div>
+      <div class="derived" id="k_derived"></div>
+      <div class="result">
+        <div class="label">ราคาต่อเมตร</div>
+        <div class="price" id="k_result">–</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="gauge-wrap">
+    <div class="gauge-top">
+      <div class="eyebrow">ผลเปรียบเทียบ</div>
+    </div>
+    <div class="winner-line" id="winner_line">กรอกข้อมูลให้ครบเพื่อดูผล</div>
+    <div class="track"><div class="fill" id="gauge_fill" style="width:50%"></div></div>
+    <div class="track-labels">
+      <span id="glabel_a">A · แบบเมตร</span>
+      <span id="glabel_b">B · แบบกิโล</span>
+    </div>
+  </div>
+
+  <div class="order-wrap">
+    <div class="order-head">
+      <div class="num">C · ปริมาณสั่งซื้อจริง</div>
+      <h2>Order volume</h2>
+    </div>
+    <div class="order-body">
+      <div class="basis-toggle">
+        <button id="o_basis_a">อ้างอิงจาก A · แบบเมตร</button>
+        <button id="o_basis_b" class="active">อ้างอิงจาก B · แบบกิโล</button>
+      </div>
+      <div class="order-qty-row">
+        <label id="o_qty_label">จำนวนม้วนที่สั่งต่อเดือน (แบบกิโล)</label>
+        <input type="number" id="o_qty" value="50" step="1" min="0">
+        <span class="unit">ม้วน / เดือน</span>
+      </div>
+
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>A · แบบเมตร</th>
+            <th>B · แบบกิโล</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">ความยาว/ม้วน</td>
+            <td id="o_len_a">–</td>
+            <td id="o_len_b">–</td>
+          </tr>
+          <tr>
+            <td class="label-cell">จำนวนม้วนที่ต้องใช้ (เท่ากันในความยาวรวม)</td>
+            <td id="o_qty_a">–</td>
+            <td id="o_qty_b">–</td>
+          </tr>
+          <tr>
+            <td class="label-cell">ราคา/ม้วน</td>
+            <td id="o_price_a">–</td>
+            <td id="o_price_b">–</td>
+          </tr>
+          <tr>
+            <td class="label-cell hi">ค่าใช้จ่ายรวม/เดือน</td>
+            <td class="hi" id="o_total_a">–</td>
+            <td class="hi" id="o_total_b">–</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="save-banner" id="o_save_banner">
+        <div class="sb-item">
+          <div class="sb-label">ประหยัดได้ต่อเดือน</div>
+          <div class="sb-value" id="o_save_month">–</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">คิดเป็น</div>
+          <div class="sb-value" id="o_save_pct">–</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">ประหยัดได้ต่อปี (x12)</div>
+          <div class="sb-value" id="o_save_year">–</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <b>วิธีคำนวณฝั่งกิโล:</b> น้ำหนักสุทธิ = น้ำหนักม้วน − น้ำหนักแกน &nbsp;→&nbsp; ความยาว (ม.) = น้ำหนักสุทธิ (กรัม) ÷ น้ำหนักต่อเมตร (กรัม/ม.) &nbsp;→&nbsp; ราคาต่อเมตร = ราคารวมทั้งม้วน ÷ ความยาว<br>
+    <b>วิธีคำนวณฝั่งปริมาณสั่งซื้อ:</b> ความยาวรวมที่ต้องใช้ = จำนวนม้วน (อ้างอิง) × ความยาว/ม้วน (อ้างอิง) &nbsp;→&nbsp; จำนวนม้วนอีกฝั่ง = ความยาวรวม ÷ ความยาว/ม้วน (อีกฝั่ง) &nbsp;→&nbsp; นำจำนวนม้วนแต่ละฝั่ง × ราคา/ม้วน แล้วเทียบผลต่าง
+  </footer>
+
+</div>
+
+<script>
+function fmt(n, digits){
+  if(!isFinite(n)) return '–';
+  return n.toLocaleString('th-TH', {minimumFractionDigits:digits, maximumFractionDigits:digits});
+}
+function val(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return isFinite(v) ? v : NaN;
+}
+
+let kMode = 'perkg'; // 'perkg' or 'total'
+let oBasis = 'b'; // 'a' or 'b' — which type the order quantity refers to
+
+document.getElementById('o_basis_a').addEventListener('click', ()=>{
+  oBasis='a';
+  document.getElementById('o_basis_a').classList.add('active');
+  document.getElementById('o_basis_b').classList.remove('active');
+  document.getElementById('o_qty_label').textContent = 'จำนวนม้วนที่สั่งต่อเดือน (แบบเมตร)';
+  calc();
+});
+document.getElementById('o_basis_b').addEventListener('click', ()=>{
+  oBasis='b';
+  document.getElementById('o_basis_b').classList.add('active');
+  document.getElementById('o_basis_a').classList.remove('active');
+  document.getElementById('o_qty_label').textContent = 'จำนวนม้วนที่สั่งต่อเดือน (แบบกิโล)';
+  calc();
+});
+document.getElementById('o_qty').addEventListener('input', calc);
+
+document.getElementById('k_mode_perkg').addEventListener('click', ()=>{
+  kMode='perkg';
+  document.getElementById('k_mode_perkg').classList.add('active');
+  document.getElementById('k_mode_total').classList.remove('active');
+  document.getElementById('k_price_label').textContent = 'ราคาต่อกิโลกรัม';
+  document.getElementById('k_price').value = 65;
+  calc();
+});
+document.getElementById('k_mode_total').addEventListener('click', ()=>{
+  kMode='total';
+  document.getElementById('k_mode_total').classList.add('active');
+  document.getElementById('k_mode_perkg').classList.remove('active');
+  document.getElementById('k_price_label').textContent = 'ราคารวมทั้งม้วน';
+  document.getElementById('k_price').value = 1100;
+  calc();
+});
+
+function calc(){
+  // ---- Panel A: meter based ----
+  const mPrice = val('m_price');
+  const mLength = val('m_length');
+  let mPerMeter = NaN;
+  const mDerivedEl = document.getElementById('m_derived');
+  if(mLength > 0 && mPrice >= 0 && !isNaN(mPrice)){
+    mPerMeter = mPrice / mLength;
+    mDerivedEl.innerHTML = `ราคาต่อเมตร = ${fmt(mPrice,2)} ÷ ${fmt(mLength,2)} ม. = <b style="color:var(--ink)">${fmt(mPerMeter,3)} บาท/ม.</b>`;
+  } else {
+    mDerivedEl.innerHTML = `<span class="warn">กรอกราคาและความยาวให้ครบ</span>`;
+  }
+  document.getElementById('m_result').innerHTML = isFinite(mPerMeter) ? `${fmt(mPerMeter,2)}<span>บาท/เมตร</span>` : '–';
+
+  // ---- Panel B: kg based ----
+  const kPrice = val('k_price');
+  const kRoll = val('k_rollweight');
+  const kCore = val('k_coreweight');
+  const kGpm = val('k_gpm');
+  const kDerivedEl = document.getElementById('k_derived');
+
+  let kPerMeter = NaN;
+  const netKg = kRoll - kCore;
+
+  if(kGpm > 0 && kRoll >= 0 && kCore >= 0 && !isNaN(kPrice)){
+    if(netKg <= 0){
+      kDerivedEl.innerHTML = `<span class="warn">น้ำหนักแกนต้องน้อยกว่าน้ำหนักม้วน</span>`;
+    } else {
+      const netGrams = netKg * 1000;
+      const lengthM = netGrams / kGpm;
+      const totalPrice = (kMode === 'perkg') ? (kPrice * netKg) : kPrice;
+      kPerMeter = totalPrice / lengthM;
+      kDerivedEl.innerHTML =
+        `น้ำหนักสุทธิ = ${fmt(kRoll,2)} − ${fmt(kCore,2)} = <b style="color:var(--ink)">${fmt(netKg,2)} กก.</b><br>` +
+        `ความยาว = ${fmt(netGrams,0)} ก. ÷ ${fmt(kGpm,2)} ก./ม. = <b style="color:var(--ink)">${fmt(lengthM,1)} ม.</b><br>` +
+        `ราคารวม = ${kMode==='perkg' ? fmt(kPrice,2)+' × '+fmt(netKg,2)+' กก.' : fmt(kPrice,2)+' (ราคา/ม้วน)'} = <b style="color:var(--ink)">${fmt(totalPrice,2)} บาท</b>`;
+    }
+  } else {
+    kDerivedEl.innerHTML = `<span class="warn">กรอกข้อมูลให้ครบและถูกต้อง</span>`;
+  }
+  document.getElementById('k_result').innerHTML = isFinite(kPerMeter) ? `${fmt(kPerMeter,2)}<span>บาท/เมตร</span>` : '–';
+
+  // ---- Comparison gauge ----
+  const winnerLine = document.getElementById('winner_line');
+  const fillEl = document.getElementById('gauge_fill');
+
+  if(isFinite(mPerMeter) && isFinite(kPerMeter) && mPerMeter > 0 && kPerMeter > 0){
+    const total = mPerMeter + kPerMeter;
+    const pctA = (kPerMeter/total)*100;
+    fillEl.style.width = pctA.toFixed(1) + '%';
+
+    const diff = Math.abs(mPerMeter - kPerMeter);
+    const pctSaving = (diff / Math.max(mPerMeter, kPerMeter)) * 100;
+
+    let cheaper, winColor;
+    if(mPerMeter < kPerMeter){
+      cheaper = 'A (แบบเมตร)';
+      winColor = 'var(--green)';
+    } else if(kPerMeter < mPerMeter){
+      cheaper = 'B (แบบกิโล)';
+      winColor = 'var(--red)';
+    } else {
+      cheaper = 'A และ B';
+      winColor = 'var(--yellow)';
+    }
+
+    fillEl.style.background = winColor;
+    winnerLine.innerHTML = `<b style="color:${winColor}">${cheaper}</b> ถูกกว่า <span class="amt" style="color:${winColor}">${fmt(diff,2)} บาท/เมตร</span> &nbsp;(${fmt(pctSaving,1)}%)`;
+  } else {
+    fillEl.style.width = '50%';
+    fillEl.style.background = 'var(--yellow)';
+    winnerLine.textContent = 'กรอกข้อมูลให้ครบทั้งสองฝั่งเพื่อดูผลเปรียบเทียบ';
+  }
+
+  // ---- Section C: order volume ----
+  const oQty = val('o_qty');
+  const priceRollA = mPrice; // total price per roll, length-based
+  const priceRollB = (kMode === 'perkg') ? (isFinite(kPrice) && netKg > 0 ? kPrice * netKg : NaN) : kPrice; // total price per roll, kg-based
+  const lenRollA = mLength;
+  const lenRollB = (kGpm > 0 && netKg > 0) ? (netKg * 1000) / kGpm : NaN;
+
+  const oLenAEl = document.getElementById('o_len_a');
+  const oLenBEl = document.getElementById('o_len_b');
+  const oQtyAEl = document.getElementById('o_qty_a');
+  const oQtyBEl = document.getElementById('o_qty_b');
+  const oPriceAEl = document.getElementById('o_price_a');
+  const oPriceBEl = document.getElementById('o_price_b');
+  const oTotalAEl = document.getElementById('o_total_a');
+  const oTotalBEl = document.getElementById('o_total_b');
+  const bannerEl = document.getElementById('o_save_banner');
+  const saveMonthEl = document.getElementById('o_save_month');
+  const savePctEl = document.getElementById('o_save_pct');
+  const saveYearEl = document.getElementById('o_save_year');
+
+  oLenAEl.textContent = isFinite(lenRollA) ? fmt(lenRollA,1) + ' ม.' : '–';
+  oLenBEl.textContent = isFinite(lenRollB) ? fmt(lenRollB,1) + ' ม.' : '–';
+  oPriceAEl.textContent = isFinite(priceRollA) ? fmt(priceRollA,2) + ' บาท' : '–';
+  oPriceBEl.textContent = isFinite(priceRollB) ? fmt(priceRollB,2) + ' บาท' : '–';
+
+  const ready = isFinite(oQty) && oQty >= 0 && isFinite(lenRollA) && lenRollA > 0 && isFinite(lenRollB) && lenRollB > 0 && isFinite(priceRollA) && isFinite(priceRollB);
+
+  if(ready){
+    const refLenPerRoll = (oBasis === 'a') ? lenRollA : lenRollB;
+    const otherLenPerRoll = (oBasis === 'a') ? lenRollB : lenRollA;
+    const totalLength = oQty * refLenPerRoll;
+    const equivOtherQty = totalLength / otherLenPerRoll;
+
+    const qtyA = (oBasis === 'a') ? oQty : equivOtherQty;
+    const qtyB = (oBasis === 'a') ? equivOtherQty : oQty;
+
+    const totalA = qtyA * priceRollA;
+    const totalB = qtyB * priceRollB;
+
+    oQtyAEl.textContent = fmt(qtyA,2) + ' ม้วน';
+    oQtyBEl.textContent = fmt(qtyB,2) + ' ม้วน';
+    oTotalAEl.textContent = fmt(totalA,2) + ' บาท';
+    oTotalBEl.textContent = fmt(totalB,2) + ' บาท';
+
+    const diffMonth = Math.abs(totalA - totalB);
+    const diffYear = diffMonth * 12;
+    const higher = Math.max(totalA, totalB);
+    const pct = higher > 0 ? (diffMonth / higher) * 100 : 0;
+    const cheaperSide = totalA < totalB ? 'A · แบบเมตร' : (totalB < totalA ? 'B · แบบกิโล' : 'เท่ากัน');
+
+    bannerEl.classList.remove('neg');
+    saveMonthEl.textContent = fmt(diffMonth,2) + ' บาท';
+    savePctEl.textContent = fmt(pct,1) + '%';
+    saveYearEl.textContent = fmt(diffYear,2) + ' บาท';
+
+    if(diffMonth > 0){
+      bannerEl.querySelector('.sb-item:first-child .sb-label').textContent = `ประหยัดได้ต่อเดือน (เลือก ${cheaperSide})`;
+    } else {
+      bannerEl.querySelector('.sb-item:first-child .sb-label').textContent = 'ต้นทุนเท่ากันทั้งสองแบบ';
+    }
+  } else {
+    oQtyAEl.textContent = '–';
+    oQtyBEl.textContent = '–';
+    oTotalAEl.textContent = '–';
+    oTotalBEl.textContent = '–';
+    saveMonthEl.textContent = '–';
+    savePctEl.textContent = '–';
+    saveYearEl.textContent = '–';
+    bannerEl.querySelector('.sb-item:first-child .sb-label').textContent = 'ประหยัดได้ต่อเดือน';
+  }
+}
+
+['m_price','m_length','k_price','k_rollweight','k_coreweight','k_gpm'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calc);
+});
+
+calc();
+
+// ---- Android home-screen app support ----
+// Builds an icon + manifest at runtime so this single file can be added to
+// the Android home screen from Chrome ( ⋮ menu → Add to Home screen ) and
+// open full-screen like a native app, no server or build step needed.
+(function setupInstallableApp(){
+  const iconSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+      <rect width="192" height="192" fill="#1E2124"/>
+      <rect x="0" y="54" width="192" height="20" fill="#F2C94C"/>
+      <rect x="0" y="118" width="192" height="20" fill="#5C7C99"/>
+      <text x="96" y="40" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700" fill="#F5F3EC" text-anchor="middle">B/M</text>
+      <text x="96" y="168" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="600" fill="#F5F3EC" text-anchor="middle">STRAP</text>
+    </svg>`.trim();
+  const iconUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(iconSvg)));
+
+  const faviconLink = document.createElement('link');
+  faviconLink.rel = 'icon';
+  faviconLink.type = 'image/svg+xml';
+  faviconLink.href = iconUrl;
+  document.head.appendChild(faviconLink);
+
+  const appleIcon = document.createElement('link');
+  appleIcon.rel = 'apple-touch-icon';
+  appleIcon.href = iconUrl;
+  document.head.appendChild(appleIcon);
+
+  const manifest = {
+    name: 'คำนวณต้นทุนสายรัด',
+    short_name: 'ต้นทุนสายรัด',
+    start_url: location.href,
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#F5F3EC',
+    theme_color: '#1E2124',
+    icons: [
+      { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+      { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  const manifestLink = document.createElement('link');
+  manifestLink.rel = 'manifest';
+  manifestLink.href = URL.createObjectURL(manifestBlob);
+  document.head.appendChild(manifestLink);
+})();
+</script>
+</body>
+</html>
